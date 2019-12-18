@@ -1,0 +1,147 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+{% include 'head.html' %}
+<body>
+
+<!-- Loading starts -->
+{% include 'preloader.html' %}
+<!-- Loading ends -->
+
+
+<!-- *************
+    ************ Header section start *************
+************* -->
+
+
+<!-- Header start -->
+{% include 'header.html' %}
+<!-- Header end -->
+
+<!-- *************
+    ************ Header section end *************
+************* -->
+
+
+<div class="container-fluid">
+
+
+    <!-- Navigation start -->
+    {% include 'nav.html' %}
+    <!-- Navigation end -->
+
+
+    <!-- *************
+        ************ Main container start *************
+    ************* -->
+    <div class="main-container">
+
+        <!-- Page header start -->
+        <div class="page-header">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">Pages</li>
+                <li class="breadcrumb-item active">Account Settings</li>
+            </ol>
+            <div class="site-award">
+                <img src="{% static 'img/award.svg'%}" alt="Award"> Easy Banking
+            </div>
+        </div>
+        <!-- Page header end -->
+
+
+        <!-- Content wrapper start -->
+        <div class="content-wrapper">
+
+            <!-- Row start -->
+            <div class="row gutters">
+                <div class="col-xl-3 col-lg-3 col-md-3 col-sm-4 col-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="account-settings">
+                                <div class="user-profile">
+                                    <h5 class="user-name">{{ user.first_name }} {{ user.last_name }}</h5>
+                                    <h6 class="user-email">{{ user.email }}</h6>
+                                </div>
+                                <div class="setting-links">
+                                    <a href="#">
+                                        <i class="icon-bell"></i>
+                                        Notifications
+                                    </a>
+                                    <a href="#">
+                                        <i class="icon-chat"></i>
+                                        Messages
+                                    </a>
+                                    <a href="#">
+                                        <i class="icon-date_range"></i>
+                                        Tasks
+                                    </a>
+                                    <a href="#">
+                                        <i class="icon-settings"></i>
+                                        Settings
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-9 col-lg-9 col-md-9 col-sm-8 col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">Profile</div>
+                        </div>
+                        <div class="card-body">
+                            <div class="row gutters">
+                                <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 col-12">
+                                    <div class="form-group">
+                                        <label for="fullName">Full Name</label>
+                                        <input type="text" value="{{ user.first_name }} {{ user.last_name }}" class="form-control" id="fullName" readonly>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="eMail">Email</label>
+                                        <input type="email" value="{{ user.email }}" class="form-control" id="eMail" readonly>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="phone">Phone</label>
+                                        <input type="text" value="{{ show.mobile_no }}" class="form-control" id="phone" readonly>
+                                    </div>
+                                </div>
+                                <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 col-12">
+                                    <div class="form-group">
+                                        <label for="addRess">Address</label>
+                                        <input type="text" value="{{ show.street }}" class="form-control" id="addRess" readonly>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="ciTy">Marital Status</label>
+                                        <input type="text" value="{{ show.marital_status }}" class="form-control" id="ciTy" readonly>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="sTate">Gender</label>
+                                        <input type="text" value="{{ show.gender }}" class="form-control" id="sTate" readonly>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Row end -->
+
+        </div>
+        <!-- Content wrapper end -->
+
+
+    </div>
+    <!-- *************
+        ************ Main container end *************
+    ************* -->
+
+
+    {% include 'footer.html' %}
+
+
+</div>
+
+{% include 'foot.html' %}
+
+</body>
+</html>

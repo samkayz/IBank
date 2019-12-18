@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+{% include 'head.html' %}
+
+<body class="authentication">
+
+<!-- Container start -->
+<div class="container">
+    <form action="/account/index" method="post">
+        {% csrf_token %}
+        <div class="row justify-content-md-center">
+            <div class="col-xl-4 col-lg-5 col-md-6 col-sm-12">
+                <div class="login-screen">
+                    <div class="login-box">
+                        <a href="#" class="login-logo">
+                            iBanking
+                        </a>
+                        {% for message in messages %}
+                            {% if message.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}
+                                <div class="alert alert-success" role="alert">
+                                    <i class="icon-check_circle"></i>{{ message }}.
+                                </div>
+                            {% elif message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}
+                                <div class="alert alert-danger" role="alert">
+                                    <i class="icon-new_releases"></i>{{ message }}.
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                        <h5>Please Login to your Account.</h5>
+                        <div class="form-group">
+                            <input type="text" name="username" class="form-control" placeholder="Username" />
+                        </div>
+                        <div class="form-group">
+                            <input type="text" name="ib_id" class="form-control" placeholder="IB Code" />
+                        </div>
+                        <div class="form-group">
+                            <input type="password" name="password" class="form-control" placeholder="Password" />
+                        </div>
+                        <div class="actions">
+                            <a href="forgot-pwd.html">Recover password</a>
+                            <button type="submit" class="btn btn-info">Login</button>
+                        </div>
+                        <hr>
+                        <div class="m-0">
+                            <span class="additional-link">No account? <a href="/account/signup" class="btn btn-secondary">Signup</a></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+
+</div>
+<!-- Container end -->
+
+</body>
+</html>

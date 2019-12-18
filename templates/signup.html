@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+
+{% include 'head.html' %}
+<body class="authentication">
+
+<!-- Container start -->
+<div class="container">
+
+    <form action="signup" method="post">
+        {% csrf_token %}
+        <div class="row justify-content-md-center">
+            <div class="col-xl-5 col-lg-6 col-md-6 col-sm-12">
+                <div class="login-screen">
+                    <div class="login-box">
+                        <a href="#" class="login-logo">
+                            iBanking
+                        </a>
+                        {% for message in messages %}
+                            {% if message.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}
+                                <div class="alert alert-success" role="alert">
+                                    <i class="icon-check_circle"></i>{{ message }}.
+                                </div>
+                            {% elif message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}
+                                <div class="alert alert-danger" role="alert">
+                                    <i class="icon-new_releases"></i>{{ message }}.
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                        <h5>Create your Admin Account.</h5>
+                        <div class="input-group">
+                            <input type="text" name="last_name" class="form-control" placeholder="Last Name" />
+                            <input type="text" name="first_name" class="form-control" placeholder="First Name">
+                        </div><br>
+                        <div class="input-group">
+                            <input type="text" name="surname" class="form-control" placeholder="Surname" />
+                        </div><br>
+                        <div class="input-group">
+                            <input type="text" name="username" class="form-control" placeholder="Username" />
+                        </div><br>
+                        <div class="input-group">
+                            <select class="form-control" name="title">
+                                <option>Select Title</option>
+                                <option value="MISS">Miss</option>
+                                <option value="MR">Mr</option>
+                            </select>
+                            <select class="form-control" name="gender">
+                                <option>Select Gender</option>
+                                <option value="MALE">Male</option>
+                                <option value="FEMALE">Female</option>
+                            </select>
+                        </div><br>
+                        <div class="form-group">
+                            <input type="email" name="email" class="form-control" placeholder="Email Address" />
+                        </div>
+                        <div class="input-group">
+                            <input type="text" name="initial" class="form-control" placeholder="Initials" />
+                            <input type="text" name="mobile" minlength="11" maxlength="11" size="11" class="form-control" placeholder="Mobile No">
+                        </div><br>
+                        <div class="form-group">
+                            <input type="text" name="address" minlength="20" maxlength="32" size="34" class="form-control" placeholder="Address" />
+                        </div>
+                        <div class="form-group">
+                            <div class="input-group">
+                                <input type="password" name="password1" class="form-control" placeholder="Password" />
+                                <input type="password" name="password2" class="form-control" placeholder="Confirm">
+                            </div>
+                            <small id="passwordHelpInline" class="text-muted">
+                                Password must be 8-20 characters long.
+                            </small>
+                            <div class="input-group">
+                                <select class="form-control" name="mode_of_id">
+                                    <option>Select Mean's of ID</option>
+                                    <option value="10">Driver's Licence</option>
+                                    <option value="10">Int'l Passport</option>
+                                </select>
+                                <input type="text" name="id_no" class="form-control" placeholder="ID No">
+                            </div><br>
+                            <div class="input-group">
+                                <select class="form-control" name="nationality">
+                                    <option>Select Nationality</option>
+                                    <option value="NG">Nigeria</option>
+                                    <option value="US">USA</option>
+                                </select>
+                                <select class="form-control" name="residence">
+                                    <option>Select Residence</option>
+                                    <option value="NG">Nigeria</option>
+                                    <option value="US">USA</option>
+                                </select>
+                            </div><br>
+                            <div class="input-group">
+                                <input type="text" name="dob" minlength="8" maxlength="8" size="8" class="form-control" placeholder="YYYYMMDD" />
+                                <select class="form-control" name="m_status">
+                                    <option>Select Marital Status</option>
+                                    <option value="MARRIED">Married</option>
+                                    <option value="SINGLE">Single</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="actions">
+                            <button type="submit" class="btn btn-primary">Signup</button>
+                        </div>
+                        <hr>
+                        <div class="m-0">
+                            <span class="additional-link">Already have an account? <a href="/account/index" class="btn btn-secondary">Login</a></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+
+</div>
+<!-- Container end -->
+
+</body>
+</html>

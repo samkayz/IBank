@@ -1,0 +1,140 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+{% include 'head.html' %}
+<body>
+
+<!-- Loading starts -->
+{% include 'preloader.html' %}
+<!-- Loading ends -->
+
+
+<!-- *************
+    ************ Header section start *************
+************* -->
+
+
+<!-- Header start -->
+{% include 'header.html' %}
+<!-- Header end -->
+
+<!-- *************
+    ************ Header section end *************
+************* -->
+
+
+<div class="container-fluid">
+
+
+    <!-- Navigation start -->
+    {% include 'nav.html' %}
+    <!-- Navigation end -->
+
+
+    <!-- *************
+        ************ Main container start *************
+    ************* -->
+    <div class="main-container">
+
+
+        <!-- Page header start -->
+        <div class="page-header">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item active"> Welcome {{ user.last_name }}</li>
+            </ol>
+            <div class="site-award">
+                <img src="{% static 'img/award.svg'%}" alt="Award"> Easy Banking
+            </div>
+        </div>
+        <!-- Page header end -->
+
+
+        <!-- Content wrapper start -->
+        <div class="content-wrapper">
+
+            <!-- Row start -->
+            <div class="row gutters">
+                <div class="col-xl-3 col-lg-3 col-md-12 col-sm-12">
+
+                </div>
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12">
+                    <form action="/account/create_acct" method="post">
+                        {% csrf_token %}
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="card-title">Open Account</div>
+                                {% for message in messages %}
+                                    {% if message.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}
+                                        <div class="alert alert-success" role="alert">
+                                            <i class="icon-check_circle"></i>{{ message }}.
+                                        </div>
+                                    {% elif message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}
+                                        <div class="alert alert-danger" role="alert">
+                                            <i class="icon-new_releases"></i>{{ message }}.
+                                        </div>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                            <div class="card-body">
+                                <div class="row gutters">
+                                    <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 col-12">
+                                        <div class="form-group">
+                                            <label for="fullName">Currency</label>
+                                            <select class="form-control" name="currency">
+                                                <option>Select Currency</option>
+                                                <option></option>
+                                                <option value="NGN">Nigeria Naira</option>
+                                                <option value="USD">United State Dollar</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 col-12">
+                                        <div class="form-group">
+                                            <label for="inputEmail">Account Type</label>
+                                            <select class="form-control" name="acct_type">
+                                                <option>Select Account Type</option>
+                                                <option></option>
+                                                <option value="6100">Obligation Account</option>
+                                                <option value="6110">Small Account</option>
+                                                <option value="6111">Asset Account</option>
+                                                <option value="6113">Individual Account Field</option>
+                                                <option value="6114">Individual Account HQ</option>
+                                                <option value="6115">Spring Account</option>
+                                                <option value="6116">IFDC Account</option>
+                                                <option value="6117">OGAS Account</option>
+                                                <option value="6123">Solar Savings Account</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="text-right">
+                                        <button class="btn btn-primary">Open Account</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="col-xl-3 col-lg-3 col-md-12 col-sm-12">
+            </div>
+        </div>
+        <!-- Row end -->
+
+    </div>
+    <!-- Content wrapper end -->
+
+</div>
+<!-- *************
+    ************ Main container end *************
+************* -->
+
+{% include 'footer.html' %}
+
+</div>
+
+{% include 'foot.html' %}
+
+</body>
+
+<!-- Mirrored from bootstrap.gallery/royal-hospital-admin/design-option-2/hospital-add-doctor.html by HTTrack Website Copier/3.x [XR&CO'2014], Wed, 11 Dec 2019 14:18:34 GMT -->
+</html>
