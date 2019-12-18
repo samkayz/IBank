@@ -1,3 +1,4 @@
+from django.db.models import Q
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User, auth
 from django.contrib.auth.decorators import login_required
@@ -165,7 +166,7 @@ def index(request):
         return render(request, 'index.html')
 
 
-@login_required(login_url='index')
+@login_required(login_url='/account/index')
 def home(request):
     return render(request, 'home.html')
 
@@ -182,7 +183,7 @@ def profile(request):
     return render(request, 'profile.html', context)
 
 
-@login_required(login_url='index')
+@login_required(login_url='/account/index')
 def create_acct(request):
     client = Client(wsdl='http://3.122.134.94:9095/ibank-test/services?wsdl')
     c_user = request.user.username
@@ -192,11 +193,94 @@ def create_acct(request):
         cus_no = Customer.objects.values('customer_no').get(cus_user=c_user)['customer_no']
         ib_cus_code = Customer.objects.values('ib_customer_id').get(cus_user=c_user)['ib_customer_id']
         print('HELLO: ' + ib_cus_code)
+        if Account.objects.filter(acct_user=c_user, acct_category=acct_type).exists():
+            messages.error(request, "Please you already have this category of Account")
+            return redirect('create_acct')
+        else:
+            req_data = {
+                'WebRequestCommon': {
+                    'company': 'NG0010001',
+                    'password': 'QWERTY',
+                    'userName': 'JMIG02',
+                },
+                'OfsFunction': {
+                    'activityName': '',
+                    'assignReason': '',
+                    'dueDate': '',
+                    'extProcess': '',
+                    'extProcessID': '',
+                    'gtsControl': '',
+                    'messageId': '',
+                    'noOfAuth': '',
+                    'owner': '',
+                    'replace': '',
+                    'startDate': '',
+                    'user': ''
+                },
+                'ACCOUNTIBCREATEType': {
+                    'CustomerNumber': cus_no,
+                    'Category': acct_type,
+                    'AccountName': '',
+                    'AccountMnemonic': '',
+                    'Currency': currency,
+                    'AccountOfficer': '8000',
+                    'IBCustomerID': ib_cus_code
+                }
+            }
+            response = client.service.CreateIBAccount(**req_data)
+            print(response)
+            if response.Status.successIndicator == 'Success':
+                cust_no = response.ACCOUNTType.CUSTOMER
+                acct_mnemonic = response.ACCOUNTType.MNEMONIC
+                acct_cat = response.ACCOUNTType.CATEGORY
+                acct_officer = response.ACCOUNTType.ACCOUNTOFFICER
+                acct_currency = response.ACCOUNTType.CURRENCY
+                acct_open_date = response.ACCOUNTType.OPENINGDATE
+                acct_no = response.ACCOUNTType.id
+                ib_cus_id = response.ACCOUNTType.IBCUSTOMERID
+
+                acct = Account(acct_user=c_user,
+                               customer_no=cust_no,
+                               acct_mnemonic=acct_mnemonic,
+                               acct_category=acct_cat,
+                               acct_officer=acct_officer,
+                               acct_currency=acct_currency,
+                               acct_open_date=acct_open_date,
+                               acct_no=acct_no,
+                               cus_id=ib_cus_id)
+                acct.save()
+                messages.success(request, 'Account Created')
+                return redirect('create_acct')
+            else:
+                messages.error(request, 'Fail, Please Try Again')
+                return redirect('create_acct')
+    return render(request, 'create_acct.html')
+
+
+@login_required(login_url='/account/index')
+def acct_list(request):
+    c_user = request.user.username
+    show = Account.objects.filter(acct_user=c_user)
+    context = {'show': show}
+    return render(request, 'acct_list.html', context)
+
+
+@login_required(login_url='/account/index')
+def fund_transfer(request):
+    client = Client(wsdl='http://3.122.134.94:9095/ibank-test/services?wsdl')
+    c_user = request.user.username
+    show = Account.objects.filter(acct_user=c_user)
+    context = {'show': show}
+    if request.method == 'POST':
+        s_acct = request.POST['s_acct']
+        r_acct = request.POST['r_acct']
+        amount = request.POST['amount']
+        comment = request.POST['comment']
         req_data = {
             'WebRequestCommon': {
                 'company': 'NG0010001',
                 'password': 'QWERTY',
-                'userName': 'JMIG02',
+                'userName': 'IBUSER.1',
             },
             'OfsFunction': {
                 'activityName': '',
@@ -212,43 +296,26 @@ def create_acct(request):
                 'startDate': '',
                 'user': ''
             },
-            'ACCOUNTIBCREATEType': {
-                'CustomerNumber': cus_no,
-                'Category': acct_type,
-                'AccountName': '',
-                'AccountMnemonic': '',
-                'Currency': currency,
-                'AccountOfficer': '8000',
-                'IBCustomerID': ib_cus_code
+            'FUNDSTRANSFERIBType': {
+                'DebitAccount': s_acct,
+                'DebitCurrency': 'NGN',
+                'DebitAmount': amount,
+                'DebitValueDate': '',
+                'CreditAccount': r_acct,
+                'CreditCurrency': 'NGN',
+                'CreditValueDate': '',
+                'TreasuryRate': '',
+                'gORDERINGCUST': {
+                    'OrderedBy': comment
+                }
             }
         }
-        response = client.service.CreateIBAccount(**req_data)
-        if Account.objects.filter(acct_category=acct_type).exists():
-            messages.error(request, "Please you already have this category of Account")
-            return redirect('create_acct')
-        elif response.Status.successIndicator == 'Success':
-            cust_no = response.ACCOUNTType.CUSTOMER
-            acct_mnemonic = response.ACCOUNTType.MNEMONIC
-            acct_cat = response.ACCOUNTType.CATEGORY
-            acct_officer = response.ACCOUNTType.ACCOUNTOFFICER
-            acct_currency = response.ACCOUNTType.CURRENCY
-            acct_open_date = response.ACCOUNTType.OPENINGDATE
-            acct_no = response.ACCOUNTType.id
-            ib_cus_id = response.ACCOUNTType.IBCUSTOMERID
-
-            acct = Account(acct_user=c_user,
-                           customer_no=cust_no,
-                           acct_mnemonic=acct_mnemonic,
-                           acct_category=acct_cat,
-                           acct_officer=acct_officer,
-                           acct_currency=acct_currency,
-                           acct_open_date=acct_open_date,
-                           acct_no=acct_no,
-                           cus_id=ib_cus_id)
-            acct.save()
-            messages.success(request, 'Account Created')
-            return redirect('create_acct')
+        response = client.service.IBFT(**req_data)
+        print(response)
+        if response.Status.successIndicator == 'Success':
+            messages.success(request, 'Transaction Successful')
+            return redirect('fund_transfer')
         else:
-            messages.error(request, 'Fail, Please Try Again')
-            return redirect('create_acct')
-    return render(request, 'create_acct.html')
+            messages.error(request, 'Fail')
+            return redirect('fund_transfer')
+    return render(request, 'fund_transfer.html', context)
