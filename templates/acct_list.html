@@ -1,0 +1,126 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+{% include 'head.html' %}
+<body>
+
+<!-- Loading starts -->
+{% include 'preloader.html' %}
+<!-- Loading ends -->
+
+
+<!-- *************
+    ************ Header section start *************
+************* -->
+
+
+<!-- Header start -->
+{% include 'header.html' %}
+<!-- Header end -->
+
+<!-- *************
+    ************ Header section end *************
+************* -->
+
+
+<div class="container-fluid">
+
+
+    <!-- Navigation start -->
+    {% include 'nav.html' %}
+    <!-- Navigation end -->
+
+
+    <!-- *************
+        ************ Main container start *************
+    ************* -->
+    <div class="main-container">
+
+
+        <!-- Page header start -->
+         <div class="page-header">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item active"> Welcome {{ user.last_name }}</li>
+            </ol>
+            <div class="site-award">
+                <img src="{% static 'img/award.png'%}" alt="Award"> Easy Banking
+            </div>
+        </div>
+        <!-- Page header end -->
+
+
+        <!-- Content wrapper start -->
+        <div class="content-wrapper">
+
+            <!-- Row start -->
+            <div class="row gutters">
+                {% for data in show %}
+                    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12">
+                        <div class="card">
+                            {% if data.acct_category == '6100' %}
+                            <div class="card-header">
+                                <div class="card-title">Obligation Account</div>
+                            </div>
+                            {% elif data.acct_category == '6110' %}
+                            <div class="card-header">
+                                <div class="card-title">Small Account</div>
+                            </div>
+                            {% elif data.acct_category == '6111' %}
+                            <div class="card-header">
+                                <div class="card-title">Asset Account</div>
+                            </div>
+                            {% elif data.acct_category == '6113' %}
+                            <div class="card-header">
+                                <div class="card-title">Individual Account</div>
+                            </div>
+                            {% elif data.acct_category == '6114' %}
+                            <div class="card-header">
+                                <div class="card-title">Individual Account HQ</div>
+                            </div>
+                            {% elif data.acct_category == '6115' %}
+                            <div class="card-header">
+                                <div class="card-title">Spring Account</div>
+                            </div>
+                            {% elif data.acct_category == '6116' %}
+                            <div class="card-header">
+                                <div class="card-title">IFDC Account</div>
+                            </div>
+                            {% elif data.acct_category == '6117' %}
+                            <div class="card-header">
+                                <div class="card-title">OGAS Account</div>
+                            </div>
+                            {% elif data.acct_category == '6123' %}
+                             <div class="card-header">
+                                <div class="card-title">Solar Savings Account</div>
+                            </div>
+                            {% endif %}
+                            <div class="card-body">
+                                <div class="doctors-list">
+                                    <a href="#">ACCT NO : {{ data.acct_no }}</a>
+                                    <a href="#">Dr. Charl De Wet</a>
+                                    <a href="#">Dr. Vladimir Despotovic</a>
+                                    <a href="#">Dr. Patrick Dillon</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            <!-- Row end -->
+
+        </div>
+        <!-- Content wrapper end -->
+
+    </div>
+    <!-- *************
+        ************ Main container end *************
+    ************* -->
+
+    {% include 'footer.html' %}
+
+</div>
+
+{% include 'foot.html' %}
+
+</body>
+</html>
