@@ -84,7 +84,7 @@
                                                 <option>Select Account</option>
                                                 <option></option>
                                                 {% for data in show %}
-                                                    <option value="{{ data.acct_no }}">{{ data.acct_no }}</option>
+                                                    <option value="{{ data.acct_no }}">{{ data.acct_no }} - {{ data.balance }}</option>
                                                 {% endfor %}
                                             </select>
                                         </div>

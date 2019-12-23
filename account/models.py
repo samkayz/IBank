@@ -32,6 +32,22 @@ class Account(models.Model):
     acct_open_date = models.CharField(max_length=100)
     acct_no = models.CharField(max_length=100)
     cus_id = models.CharField(max_length=100)
+    balance = models.CharField(max_length=1000)
 
     class Meta:
         db_table = 'account'
+
+
+class History(models.Model):
+    trans_id = models.CharField(max_length=1000)
+    sender_acct = models.CharField(max_length=1000)
+    amount = models.CharField(max_length=1000)
+    date = models.CharField(max_length=1000)
+    receiver_acct = models.CharField(max_length=1000)
+    debit_customer = models.CharField(max_length=1000)
+    credit_customer = models.CharField(max_length=1000)
+    message = models.CharField(max_length=1000)
+
+    class Meta:
+        db_table = 'history'
+

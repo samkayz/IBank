@@ -2,7 +2,7 @@ from django.db.models import Q
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User, auth
 from django.contrib.auth.decorators import login_required
-from .models import Customer, Account
+from .models import Customer, Account, History
 from django.contrib import messages
 from zeep import Client
 import string
@@ -166,8 +166,35 @@ def index(request):
         return render(request, 'index.html')
 
 
-@login_required(login_url='/account/index')
+@login_required(login_url='index')
 def home(request):
+    client = Client(wsdl='http://3.122.134.94:9095/ibank-test/services?wsdl')
+    c_user = request.user.username
+    for data in Account.objects.filter(acct_user=c_user):
+        req_data = {
+            'WebRequestCommon': {
+                'company': 'NG0010001',
+                'password': 'QWERTY',
+                'userName': 'JMIG02',
+            },
+            'IBACCTBALTODAYType': {
+                'enquiryInputCollection': {
+                    'columnName': 'ACCOUNT.NUMBER',
+                    'criteriaValue': data.acct_no,
+                    'operand': 'EQ'
+                }
+            }
+        }
+        response = client.service.CheckAcctBalance(**req_data)
+        bal = response.IBACCTBALTODAYType
+        acct_bal = bal[0].gIBACCTBALTODAYDetailType.mIBACCTBALTODAYDetailType[1].WorkingBalance
+        # print(bal[0].gIBACCTBALTODAYDetailType.mIBACCTBALTODAYDetailType[1].WorkingBalance)
+        if acct_bal is None:
+            Account.objects.filter(acct_no=data.acct_no).update(balance='0.00')
+        else:
+            # acct_hold = data.acct_no + ':' + acct_bal
+            # print(acct_hold)
+            Account.objects.filter(acct_no=data.acct_no).update(balance=acct_bal)
     return render(request, 'home.html')
 
 
@@ -176,6 +203,7 @@ def logout(request):
     return redirect('index')
 
 
+@login_required(login_url='index')
 def profile(request):
     c_user = request.user.username
     show = Customer.objects.all().get(cus_user=c_user)
@@ -183,7 +211,7 @@ def profile(request):
     return render(request, 'profile.html', context)
 
 
-@login_required(login_url='/account/index')
+@login_required(login_url='index')
 def create_acct(request):
     client = Client(wsdl='http://3.122.134.94:9095/ibank-test/services?wsdl')
     c_user = request.user.username
@@ -257,15 +285,41 @@ def create_acct(request):
     return render(request, 'create_acct.html')
 
 
-@login_required(login_url='/account/index')
+@login_required(login_url='index')
 def acct_list(request):
+    client = Client(wsdl='http://3.122.134.94:9095/ibank-test/services?wsdl')
     c_user = request.user.username
     show = Account.objects.filter(acct_user=c_user)
     context = {'show': show}
+    for data in Account.objects.filter(acct_user=c_user):
+        req_data = {
+            'WebRequestCommon': {
+                'company': 'NG0010001',
+                'password': 'QWERTY',
+                'userName': 'JMIG02',
+            },
+            'IBACCTBALTODAYType': {
+                'enquiryInputCollection': {
+                    'columnName': 'ACCOUNT.NUMBER',
+                    'criteriaValue': data.acct_no,
+                    'operand': 'EQ'
+                }
+            }
+        }
+        response = client.service.CheckAcctBalance(**req_data)
+        bal = response.IBACCTBALTODAYType
+        acct_bal = bal[0].gIBACCTBALTODAYDetailType.mIBACCTBALTODAYDetailType[1].WorkingBalance
+        # print(bal[0].gIBACCTBALTODAYDetailType.mIBACCTBALTODAYDetailType[1].WorkingBalance)
+        if acct_bal is None:
+            Account.objects.filter(acct_no=data.acct_no).update(balance='0.00')
+        else:
+            # acct_hold = data.acct_no + ':' + acct_bal
+            # print(acct_hold)
+            Account.objects.filter(acct_no=data.acct_no).update(balance=acct_bal)
     return render(request, 'acct_list.html', context)
 
 
-@login_required(login_url='/account/index')
+@login_required(login_url='index')
 def fund_transfer(request):
     client = Client(wsdl='http://3.122.134.94:9095/ibank-test/services?wsdl')
     c_user = request.user.username
@@ -280,7 +334,7 @@ def fund_transfer(request):
             'WebRequestCommon': {
                 'company': 'NG0010001',
                 'password': 'QWERTY',
-                'userName': 'IBUSER.1',
+                'userName': 'JMIG02',
             },
             'OfsFunction': {
                 'activityName': '',
@@ -311,11 +365,42 @@ def fund_transfer(request):
             }
         }
         response = client.service.IBFT(**req_data)
-        print(response)
+        # print(response)
         if response.Status.successIndicator == 'Success':
+            transId = response.Status.transactionId
+            sender = response.FUNDSTRANSFERType.DEBITACCTNO
+            amount = response.FUNDSTRANSFERType.DEBITAMOUNT
+            date = response.FUNDSTRANSFERType.DEBITVALUEDATE
+            receiver = response.FUNDSTRANSFERType.CREDITACCTNO
+            DebitCust = response.FUNDSTRANSFERType.DEBITCUSTOMER
+            CreditCust = response.FUNDSTRANSFERType.CREDITCUSTOMER
+            msg = response.FUNDSTRANSFERType.gORDERINGCUST.ORDERINGCUST[0]
+            his = History(trans_id=transId,
+                          sender_acct=sender,
+                          amount=amount,
+                          date=date,
+                          receiver_acct=receiver,
+                          debit_customer=DebitCust,
+                          credit_customer=CreditCust,
+                          message=msg)
+            his.save()
             messages.success(request, 'Transaction Successful')
             return redirect('fund_transfer')
         else:
             messages.error(request, 'Fail')
             return redirect('fund_transfer')
     return render(request, 'fund_transfer.html', context)
+
+
+@login_required(login_url='index')
+def history(request):
+    c_user = request.user.username
+    cust_id = Customer.objects.values('customer_no').get(cus_user=c_user)['customer_no']
+    show = History.objects.filter(Q(debit_customer=cust_id) | Q(credit_customer=cust_id))
+    context = {'show': show}
+    return render(request, 'history.html', context)
+
+
+@login_required(login_url='index')
+def book_loan(request):
+    return render(request, 'book_loan.html')
