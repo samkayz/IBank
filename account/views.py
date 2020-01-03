@@ -106,11 +106,11 @@ def signup(request):
                 if response.Status.successIndicator == 'Success':
                     c_no = response.CUSTOMERType.id
                     mnemonic = response.CUSTOMERType.MNEMONIC
-                    short_name = response.CUSTOMERType.gSHORTNAME.SHORTNAME
-                    name1 = response.CUSTOMERType.gNAME1.NAME1
-                    name2 = response.CUSTOMERType.gNAME2.NAME2
+                    short_name = response.CUSTOMERType.gSHORTNAME.SHORTNAME[0]
+                    name1 = response.CUSTOMERType.gNAME1.NAME1[0]
+                    name2 = response.CUSTOMERType.gNAME2.NAME2[0]
                     tit = response.CUSTOMERType.TITLE
-                    id_num = response.CUSTOMERType.gLEGALIDDOCNAME.LEGALIDDOCNAME
+                    id_num = response.CUSTOMERType.gLEGALIDDOCNAME.LEGALIDDOCNAME[0]
                     d_o_b = response.CUSTOMERType.BIRTHINCORPDATE
                     gend = response.CUSTOMERType.GENDER
                     marital = response.CUSTOMERType.MARITALSTATUS
@@ -166,7 +166,7 @@ def index(request):
         return render(request, 'index.html')
 
 
-@login_required(login_url='index')
+@login_required(login_url='/account/index')
 def home(request):
     client = Client(wsdl='http://3.122.134.94:9095/ibank-test/services?wsdl')
     c_user = request.user.username
@@ -203,7 +203,7 @@ def logout(request):
     return redirect('index')
 
 
-@login_required(login_url='index')
+@login_required(login_url='/account/index')
 def profile(request):
     c_user = request.user.username
     show = Customer.objects.all().get(cus_user=c_user)
@@ -211,7 +211,7 @@ def profile(request):
     return render(request, 'profile.html', context)
 
 
-@login_required(login_url='index')
+@login_required(login_url='/account/index')
 def create_acct(request):
     client = Client(wsdl='http://3.122.134.94:9095/ibank-test/services?wsdl')
     c_user = request.user.username
@@ -256,7 +256,7 @@ def create_acct(request):
                 }
             }
             response = client.service.CreateIBAccount(**req_data)
-            print(response)
+            # print(response)
             if response.Status.successIndicator == 'Success':
                 cust_no = response.ACCOUNTType.CUSTOMER
                 acct_mnemonic = response.ACCOUNTType.MNEMONIC
@@ -285,7 +285,7 @@ def create_acct(request):
     return render(request, 'create_acct.html')
 
 
-@login_required(login_url='index')
+@login_required(login_url='/account/index')
 def acct_list(request):
     client = Client(wsdl='http://3.122.134.94:9095/ibank-test/services?wsdl')
     c_user = request.user.username
@@ -319,7 +319,23 @@ def acct_list(request):
     return render(request, 'acct_list.html', context)
 
 
-@login_required(login_url='index')
+def verify(request):
+    if request.method == 'POST':
+        r_acct = request.POST['r_acct']
+        cust_no = Account.objects.values('customer_no').get(acct_no=r_acct)['customer_no']
+        detail = Customer.objects.filter(customer_no=cust_no).exists()
+        if detail:
+            check = Customer.objects.all().get(customer_no=cust_no)
+            context = {'check': check}
+            return render(request, 'fund_transfer.html', context)
+        else:
+            messages.error(request, 'Account Not Found')
+            return redirect('fund_transfer')
+
+    return render(request, 'fund_transfer.html')
+
+
+@login_required(login_url='/account/index')
 def fund_transfer(request):
     client = Client(wsdl='http://3.122.134.94:9095/ibank-test/services?wsdl')
     c_user = request.user.username
@@ -392,7 +408,7 @@ def fund_transfer(request):
     return render(request, 'fund_transfer.html', context)
 
 
-@login_required(login_url='index')
+@login_required(login_url='/account/index')
 def history(request):
     c_user = request.user.username
     cust_id = Customer.objects.values('customer_no').get(cus_user=c_user)['customer_no']
@@ -401,6 +417,210 @@ def history(request):
     return render(request, 'history.html', context)
 
 
-@login_required(login_url='index')
+@login_required(login_url='/account/index')
 def book_loan(request):
+    client = Client(wsdl='http://3.122.134.94:9095/ibank-test/services?wsdl')
+    c_user = request.user.username
+    customer = Customer.objects.values('customer_no').get(cus_user=c_user)['customer_no']
+    if request.method == 'POST':
+        l_type = request.POST['l_type']
+        e_date = request.POST['e_date']
+        amount = request.POST['amount']
+
+        req_data = {
+            'WebRequestCommon': {
+                'company': 'NG0010001',
+                'password': 'QWERTY',
+                'userName': 'JMIG02',
+            },
+            'OfsFunction': {
+                'activityName': '',
+                'assignReason': '',
+                'dueDate': '',
+                'extProcess': '',
+                'extProcessID': '',
+                'gtsControl': '',
+                'messageId': '',
+                'noOfAuth': '',
+                'owner': '',
+                'replace': '',
+                'startDate': '',
+                'user': ''
+            },
+            'AAARRANGEMENTACTIVITYIBNEWLOANType': {
+                'Arrangement': '',
+                'Activity': '',
+                'Effective': e_date,
+                'Customer': customer,
+                'Product': l_type,
+                'Currency': 'NGN',
+                'GroupId': ''
+            },
+            'AAARRCUSTOMEREMNEW_CUSTOMER': {
+                'gOWNER': {
+                    'Owner': customer
+                },
+                'PrimaryOwner': customer,
+                'GroupId': '',
+                'LOANAPPLID': ''
+            },
+            'AAARRBALANCEMAINTENANCEEMDEFAULT_BALANCEMAINTENANCE': {
+                'RESERVED10': ''
+            },
+            'AAARRTERMAMOUNTEMINPUT_COMMITMENT': {
+                'Amount': amount,
+                'Term': '24W',
+                'MaturityDate': '',
+                'CancelPeriod': '5D',
+                'SourceofFunds': '99',
+                'Loanpurpose': '1',
+            },
+            'AAARROFFICERSEMDEFAULT_OFFICERS': {
+                'PrimaryOfficer': '8000'
+            },
+            'AAARRLIMITEMDEFAULT_LIMIT': {
+                'LimitRef': '',
+                'Serial': '',
+                'SingleLimit': '',
+                'AllowNetting': ''
+            },
+            'AAARRACCOUNTEMDEFAULT_ACCOUNT': {
+                'AccountTitle': '',
+                'AccountName': '',
+                'Mnemonic': '',
+                'gALTIDTYPE': {
+                    'mALTIDTYPE': {
+                        'AlternateID': '',
+                        'ALTID': ''
+                    }
+                },
+                'AccountNumber': ''
+            },
+            'AAARRSETTLEMENTEMDEFAULT_SETTLEMENT': {
+                'sgPAYMENTTYPE': {
+                    'PAYMENTTYPE': ''
+                },
+                'PAYINSETTLEACTIVITY': '',
+                'PAYINSETTLEMENT': '',
+                'PAYINACDBRULE': '',
+                'sgPAYINACCOUNT': {
+                    'PAYINACCOUNT': ''
+                },
+                'PAYINRCTYPE': '',
+                'PAYINRCCONDITION': ''
+            },
+            'AAARRCHARGEOVERRIDEAA_CHARGEOVERRIDE': {
+                'gPROPERTY': {
+                    'mPROPERTY': {
+                        'PROPERTY': '',
+                        'sgCHGAMT': {
+                            'CHGAMT': {
+                                'CHGAMT': '',
+                                'CHGACTAMT': '',
+                                'CHGDESC': ''
+                            }
+                        }
+                    }
+                }
+            },
+            'AAARRCHARGEEMDEFAULT_SERVICECHARGE': {
+                'FIXEDAMOUNT': '',
+                'CALCTHRESHOLD': '',
+                'CHARGERATE': '',
+                'TIERMINCHARGE': '',
+                'TIERMAXCHARGE': ''
+            },
+            'AAARRCHARGEEMDEFAULT_RISKPREMIUM': {
+                'FIXEDAMOUNT': '',
+                'CALCTHRESHOLD': '',
+                'CHARGERATE': '',
+                'TIERMINCHARGE': '',
+                'TIERMAXCHARGE': ''
+            },
+            'AAARRCHARGEEMDEFAULT_LOANFORM': {
+                'FIXEDAMOUNT': '',
+                'CALCTHRESHOLD': '',
+                'CHARGERATE': '',
+                'TIERMINCHARGE': '',
+                'TIERMAXCHARGE': ''
+            },
+            'AAARRCHARGEEMDEFAULT_PAYOFFFEE': {
+                'FIXEDAMOUNT': '',
+                'CALCTHRESHOLD': '',
+                'CHARGERATE': '',
+                'TIERMINCHARGE': '',
+                'TIERMAXCHARGE': ''
+            },
+            'AAARRINTERESTEMDEFAULT_PRINCIPALINT': {
+                'FIXEDRATE': ''
+            },
+            'AAARRPAYMENTSCHEDULEEMDEFAULT_SCHEDULE': {
+                'gPAYMENTTYPE': {
+                    'mPAYMENTTYPE': {
+                        'PAYMENTTYPE': '',
+                        'PAYMENTMETHOD': '',
+                        'PAYMENTFREQ': '',
+                        'sgPROPERTY': {
+                            'PROPERTY': {
+                                'PROPERTY': '',
+                                'PERCENTAGE': ''
+                            }
+                        },
+                        'sgSTARTDATE': {
+                            'STARTDATE': {
+                                'STARTDATE': '',
+                                'ENDDATE': '',
+                                'NUMPAYMENTS': '',
+                                'CALCAMOUNT': '',
+                                'ACTUALAMT': ''
+                            }
+                        },
+                        'Bill': ''
+                    }
+                }
+            },
+            'AAARRALERTSEMDEFAULT_ALERTS': {
+                'RESERVED1': ''
+            }
+        }
+        response = client.service.BookAALoan(**req_data)
+        print(response)
     return render(request, 'book_loan.html')
+
+
+@login_required(login_url='/account/index')
+def statement(request):
+    client = Client(wsdl='http://3.122.134.94:9095/ibank-test/services?wsdl')
+    c_user = request.user.username
+    show = Account.objects.filter(acct_user=c_user)
+    context = {'show': show}
+    if request.method == 'POST':
+        account = request.POST['account']
+        req_data = {
+            'WebRequestCommon': {
+                'company': 'NG0010001',
+                'password': 'QWERTY',
+                'userName': 'JMIG02',
+            },
+            'IBACCTSTMTType': {
+                'enquiryInputCollection': {
+                    'columnName': 'ACCT.ID',
+                    'criteriaValue': account,
+                    'operand': 'EQ'
+                },
+                'enquiryInputCollection': {
+                    'columnName': 'BOOKING.DATE',
+                    'criteriaValue': '20180126',
+                    'operand': 'EQ'
+                },
+                'enquiryInputCollection': {
+                    'columnName': 'VALUE.DATE',
+                    'criteriaValue': '',
+                    'operand': ''
+                }
+            }
+        }
+        response = client.service.CheckAcctStatement(**req_data)
+        print(response)
+        print(account)
+    return render(request, 'statement.html', context)

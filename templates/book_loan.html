@@ -58,7 +58,7 @@
 
                 </div>
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12">
-                    <form action="/account/fund_transfer" method="post">
+                    <form action="/account/book_loan" method="post">
                         {% csrf_token %}
                         <div class="card">
                             <div class="card-header">
@@ -79,32 +79,24 @@
                                 <div class="row gutters">
                                     <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 col-12">
                                         <div class="form-group">
-                                            <label for="fullName">Account</label>
-                                            <select class="form-control" name="s_acct">
-                                                <option>Select Account</option>
+                                            <label for="fullName">Loan Type</label>
+                                            <select class="form-control" name="l_type">
+                                                <option>Select Loan Type</option>
                                                 <option></option>
-                                                {% for data in show %}
-                                                    <option value="{{ data.acct_no }}">{{ data.acct_no }} - {{ data.balance }}</option>
-                                                {% endfor %}
+                                                    <option value="SmallLoan">Small Loan</option>
                                             </select>
                                         </div>
                                     </div>
                                     <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 col-12">
                                         <div class="form-group">
-                                            <label for="inputEmail">Receiver's Acct. No</label>
-                                            <input type="text" minlength="10" maxlength="10" size="10" class="form-control" name="r_acct"/>
+                                            <label for="inputEmail">Effective Date</label>
+                                            <input type="text" placeholder="YYYMMDD" class="form-control" name="e_date"/>
                                         </div>
                                     </div>
                                     <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 col-12">
                                         <div class="form-group">
                                             <label for="inputEmail">Amount</label>
                                             <input type="text" class="form-control" name="amount"/>
-                                        </div>
-                                    </div>
-                                    <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 col-12">
-                                        <div class="form-group">
-                                            <label for="inputEmail">Comment</label>
-                                            <input type="text" class="form-control" name="comment"/>
                                         </div>
                                     </div>
                                 </div>
@@ -136,6 +128,4 @@
 {% include 'foot.html' %}
 
 </body>
-
-<!-- Mirrored from bootstrap.gallery/royal-hospital-admin/design-option-2/hospital-add-doctor.html by HTTrack Website Copier/3.x [XR&CO'2014], Wed, 11 Dec 2019 14:18:34 GMT -->
 </html>
